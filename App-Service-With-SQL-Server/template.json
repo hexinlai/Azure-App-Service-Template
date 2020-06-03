@@ -1,0 +1,271 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_pcarecruit_name": {
+            "defaultValue": "pcarecruit",
+            "type": "String"
+        },
+        "serverfarms_ASP_pcarecruit_a121_externalid": {
+            "defaultValue": "/subscriptions/584d2782-5dfc-4add-9be7-95d9c0220e11/resourceGroups/pca_recruit/providers/Microsoft.Web/serverfarms/ASP-pcarecruit-a121",
+            "type": "String"
+        },
+        "servers_pcarecruit_name": {
+            "defaultValue": "pcarecruit",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_pcarecruit_name')]",
+            "location": "Southeast Asia",
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_pcarecruit_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_pcarecruit_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[parameters('serverfarms_ASP_pcarecruit_a121_externalid')]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {},
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_pcarecruit_name'), '/web')]",
+            "location": "Southeast Asia",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "TOMCAT|8.5-jre8",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$pcarecruit",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_pcarecruit_name'), '/', parameters('sites_pcarecruit_name'), '.azurewebsites.net')]",
+            "location": "Southeast Asia",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "siteName": "pcarecruit",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[parameters('servers_pcarecruit_name')]",
+            "location": "Southeast Asia",
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "admin_chunyang",
+                "administratorLoginPassword": "Win@pcacn",
+                "version": "12.0",
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/', parameters('servers_pcarecruit_name'))]",
+            "location": "Southeast Asia",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard",
+                "capacity": 10
+            },
+            "kind": "v12.0,user",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 268435456000,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "readReplicaCount": 0,
+                "storageAccountType": "GRS"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/encryptionProtector",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyName": "ServiceManaged",
+                "serverKeyType": "ServiceManaged"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/ClientIPAddress_2020-05-29_06:26:28')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "210.22.25.0",
+                "endIpAddress": "210.22.25.255"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/ClientIPAddress_2020-05-29_06:43:19')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "50.7.251.0",
+                "endIpAddress": "50.7.251.255"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/ClientIPAddress_2020-6-1_14-28-55')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "210.22.25.114",
+                "endIpAddress": "210.22.25.114"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "13.76.100.162",
+                "endIpAddress": "13.76.100.162"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": true,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2017-10-01-preview",
+            "name": "[concat(parameters('servers_pcarecruit_name'), '/', parameters('servers_pcarecruit_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_pcarecruit_name'), parameters('servers_pcarecruit_name'))]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_pcarecruit_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7
+            }
+        }
+    ]
+}
